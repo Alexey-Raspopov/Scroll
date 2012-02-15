@@ -52,7 +52,7 @@
         style.webkitTransitionProperty = '-webkit-transform';
         style.webkitTransitionTimingFunction = 'cubic-bezier(0, 0, 0.25, 1)';
         style.webkitTransitionDuration = '0';
-        style.webkitTransform = 'translate(0px, 0px)';
+        this.setTranslate(0, 0);
         [events.start, events.move, events.end].forEach(function (eventName) {
             this.element.addEventListener(eventName, this, false);
         }, this);
@@ -89,13 +89,31 @@
         }
     };
     Scroll.prototype.startEvent = function (event) {
-        
+        event.stopPropagation();
+        event.preventDefault(); //TODO: check event.target. if it's input - skip preventDefult execution
+        this.isScroll = true;
+        this.startX = event.pageX;
+        this.startY = event.pageY;
+        this.startTranslate = this.getTranslate();
     };
     Scroll.prototype.moveEvent = function (event) {
-        
+        event.stopPropagation();
+        event.preventDefault();
     };
     Scroll.prototype.endEvent = function (event) {
-        
+        event.stopPropagation();
+        event.preventDefault();
+        this.isScroll = false;
+    };
+    Scroll.prototype.getTranslate = function () {
+        var translate = /translate\(([\-0-9]+)px,\s([\-0-9]+)px\)/.exec(this.element.style.webkitTransform);
+        if (translate) {
+            return translate.slice(1).map(function (coord) { return parseInt(coord, 10); });
+        }
+        return [0, 0];
+    };
+    Scroll.prototype.setTranslate = function (x, y) {
+        this.element.style.webkitTransform = 'translate(' + x + 'px, ' + y + 'px)';
     };
     Scroll.prototype.refresh = function () {
         
