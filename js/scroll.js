@@ -4,11 +4,11 @@
  * @autor Alexey Raspopov
  * @description ...
  */
-(function (global, document, HTMLElement) {
+(function (global, document, HTMLElement, HTMLInputElement) {
     'use strict';
     var isTouch = window.hasOwnProperty('ontouchstart'), events;
     if (isTouch) {
-        events = {start: 'touchstart', move: 'touchmove', end: 'touchend'};  
+        events = {start: 'touchstart', move: 'touchmove', end: 'touchend'};
     } else {
         events = {start: 'mousedown', move: 'mousemove', end: 'mouseup'};
     }
@@ -62,6 +62,7 @@
         window.addEventListener('resize', this, false);
         this.isScroll = false;
         this.isEnable = true;
+        this.refresh();
     }
     Scroll.prototype.handleEvent = function (event) {
         var type = event.type;
@@ -90,7 +91,9 @@
     };
     Scroll.prototype.startEvent = function (event) {
         event.stopPropagation();
-        event.preventDefault(); //TODO: check event.target. if it's input - skip preventDefult execution
+        if (!(event.target instanceof HTMLInputElement)) {
+            event.preventDefault();
+        }
         this.isScroll = true;
         this.startX = event.pageX;
         this.startY = event.pageY;
@@ -108,7 +111,9 @@
     Scroll.prototype.getTranslate = function () {
         var translate = /translate\(([\-0-9]+)px,\s([\-0-9]+)px\)/.exec(this.element.style.webkitTransform);
         if (translate) {
-            return translate.slice(1).map(function (coord) { return parseInt(coord, 10); });
+            return translate.slice(1).map(function (coord) {
+                return parseInt(coord, 10);
+            });
         }
         return [0, 0];
     };
@@ -116,7 +121,15 @@
         this.element.style.webkitTransform = 'translate(' + x + 'px, ' + y + 'px)';
     };
     Scroll.prototype.refresh = function () {
-        
+        var parent = this.element.parentNode;
+        this.scrollWidth = parent.clientWidth;
+        this.scrollHeight = parent.clientHeight;
+        this.scrollerWidth = this.element.offsetWidth;
+        this.scrollerHeight = this.element.offsetHeight;
+        this.scrollX = this.scrollerWidth > this.scrollWidth;
+        this.scrollY = this.scrollerHeight > this.scrollHeight;
+        this.maxScrollX = this.scrollWidth - this.scrollerWidth;
+        this.maxScrollY = this.scrollHeight - this.scrollerHeight;
     };
     global.Scroll = Scroll;
-})(window, document, HTMLElement);
+})(window, document, HTMLElement, HTMLInputElement);
