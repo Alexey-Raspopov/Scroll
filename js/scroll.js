@@ -71,22 +71,34 @@
         switch (type) {
         case events.start:
             if (this.isEnable) {
-                //this.startEvent(event);
+                this.startEvent(event);
             }
             break;
         case events.move:
             if (this.isScroll) {
-                //this.moveEvent(event);
+                this.moveEvent(event);
             }
             break;
         case events.end:
-            //this.endEvent(event);
+            this.endEvent(event);
             break;
         case 'DOMSubtreeModified':
         case 'resize':
-            //this.refresh();
+            this.refresh();
             break;
         }
+    };
+    Scroll.prototype.startEvent = function (event) {
+        
+    };
+    Scroll.prototype.moveEvent = function (event) {
+        
+    };
+    Scroll.prototype.endEvent = function (event) {
+        
+    };
+    Scroll.prototype.refresh = function () {
+        
     };
     global.Scroll = Scroll;
 })(window, document, HTMLElement);
