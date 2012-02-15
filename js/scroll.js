@@ -126,8 +126,8 @@
         this.scrollHeight = parent.clientHeight;
         this.scrollerWidth = this.element.offsetWidth;
         this.scrollerHeight = this.element.offsetHeight;
-        this.scrollX = this.scrollerWidth > this.scrollWidth;
-        this.scrollY = this.scrollerHeight > this.scrollHeight;
+        this.canScrollX = this.scrollerWidth > this.scrollWidth;
+        this.canScrollY = this.scrollerHeight > this.scrollHeight;
         this.maxScrollX = this.scrollWidth - this.scrollerWidth;
         this.maxScrollY = this.scrollHeight - this.scrollerHeight;
     };
