@@ -1,0 +1,16 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+article {
+    margin: 10px;
+    border: 1px dashed gray;
+    width: 400px;
+    height: 300px;
+    overflow: hidden;
+}
+.scroll-y {
+    float: left;
+    width: inherit;
+    height: auto;
+}
