@@ -6,6 +6,12 @@
  */
 (function (global, document, HTMLElement) {
     'use strict';
+    var isTouch = window.hasOwnProperty('ontouchstart'), events;
+    if (isTouch) {
+        events = {start: 'touchstart', move: 'touchmove', end: 'touchend'};  
+    } else {
+        events = {start: 'mousedown', move: 'mousemove', end: 'mouseup'};
+    }
     function getElement(selector) {
         var element;
         if (typeof selector === 'string') {
@@ -47,7 +53,7 @@
         style.webkitTransitionTimingFunction = 'cubic-bezier(0, 0, 0.25, 1)';
         style.webkitTransitionDuration = '0';
         style.webkitTransform = 'translate(0px, 0px)';
-        ['mousedown', 'mousemove', 'mouseup'].forEach(function (eventName) {
+        [events.start, events.move, events.end].forEach(function (eventName) {
             this.element.addEventListener(eventName, this, false);
         }, this);
         if (this.options.checkDOMChanges) {
@@ -59,18 +65,21 @@
     }
     Scroll.prototype.handleEvent = function (event) {
         var type = event.type;
+        if (isTouch) {
+            event = event.changedTouches[0];
+        }
         switch (type) {
-        case 'mousedown':
+        case events.start:
             if (this.isEnable) {
                 //this.startEvent(event);
             }
             break;
-        case 'mousemove':
+        case events.move:
             if (this.isScroll) {
                 //this.moveEvent(event);
             }
             break;
-        case 'mouseup':
+        case events.end:
             //this.endEvent(event);
             break;
         case 'DOMSubtreeModified':
