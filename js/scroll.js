@@ -2,7 +2,7 @@
  * JavaScript Scroll library
  * @version 0.1
  * @autor Alexey Raspopov
- * @description ...
+ * @description library to implement scrolling content on mobile WebKit.
  */
 (function (global, document, HTMLElement, HTMLInputElement) {
     'use strict';
@@ -100,8 +100,15 @@
         this.startTranslate = this.getTranslate();
     };
     Scroll.prototype.moveEvent = function (event) {
+        var translateX = 0, translateY = 0;
         event.stopPropagation();
         event.preventDefault();
+        if (this.canScrollX) {
+            translateX = event.pageX - this.startX + this.startTranslate[0];
+        } else if (this.canScrollY) {
+            translateY = event.pageY - this.startY + this.startTranslate[1];
+        }
+        this.setTranslate(translateX, translateY);
     };
     Scroll.prototype.endEvent = function (event) {
         event.stopPropagation();
