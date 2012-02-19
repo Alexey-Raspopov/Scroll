@@ -46,6 +46,9 @@
                 this.options[option] = options[option];
             }
         }
+        if (typeof this.options.onScrollEnd !== 'function') {
+            throw new TypeError('onScrollEnd should be a function');
+        }
         this.onScrollEnd = this.options.onScrollEnd;
         delete this.options.onScrollEnd;
         style = this.element.style;
@@ -59,7 +62,7 @@
         if (this.options.checkDOMChanges) {
             this.element.addEventListener('DOMSubtreeModified', this, false);
         }
-        window.addEventListener('resize', this, false);
+        window.addEventListener(isTouch ? 'orientationchange' : 'resize', this, false);
         this.isScroll = false;
         this.isEnable = true;
         this.refresh();
@@ -69,6 +72,7 @@
         if (isTouch) {
             event = event.changedTouches[0];
         }
+        event.stopPropagation();
         switch (type) {
         case events.start:
             if (this.isEnable) {
@@ -76,21 +80,23 @@
             }
             break;
         case events.move:
+            event.preventDefault();
             if (this.isScroll) {
                 this.moveEvent(event);
             }
             break;
         case events.end:
-            this.endEvent(event);
+            event.preventDefault();
+            this.isScroll = false;
             break;
         case 'DOMSubtreeModified':
+        case 'orientationchange':
         case 'resize':
             this.refresh();
             break;
         }
     };
     Scroll.prototype.startEvent = function (event) {
-        event.stopPropagation();
         if (!(event.target instanceof HTMLInputElement)) {
             event.preventDefault();
         }
@@ -101,19 +107,33 @@
     };
     Scroll.prototype.moveEvent = function (event) {
         var translateX = 0, translateY = 0;
-        event.stopPropagation();
-        event.preventDefault();
         if (this.canScrollX) {
             translateX = event.pageX - this.startX + this.startTranslate[0];
+            if (translateX > 0) {
+                translateX = 0;
+            } else if (translateX < this.maxScrollX) {
+                translateX = this.maxScrollX;
+            }
         } else if (this.canScrollY) {
             translateY = event.pageY - this.startY + this.startTranslate[1];
+            if (translateY > 0) {
+                translateY = 0;
+            } else if (translateY < this.maxScrollY) {
+                translateY = this.maxScrollY;
+            }
         }
         this.setTranslate(translateX, translateY);
     };
-    Scroll.prototype.endEvent = function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        this.isScroll = false;
+    Scroll.prototype.scrollTo = function (x, y, duration) {
+        if (!this.canScrollX || x < 0) {
+            x = 0;
+        }
+        if (!this.canScrollY || y < 0) {
+            y = 0;
+        }
+        this.setDuration(duration);
+        this.setTranslate(-x, -y);
+        this.onScrollEnd();
     };
     Scroll.prototype.getTranslate = function () {
         var translate = /translate\(([\-0-9]+)px,\s([\-0-9]+)px\)/.exec(this.element.style.webkitTransform);
@@ -126,6 +146,17 @@
     };
     Scroll.prototype.setTranslate = function (x, y) {
         this.element.style.webkitTransform = 'translate(' + x + 'px, ' + y + 'px)';
+    };
+    Scroll.prototype.setDuration = function (duration) {
+        var resetDuration = function () {
+            this.style.webkitTransitionDuration = '0ms';
+            this.removeEventListener('webkitTransitionEnd', resetDuration);
+        };
+        if (!/[0-9]+[ms]/.test(duration)) {
+            duration = '0ms';
+        }
+        this.element.style.webkitTransitionDuration = duration;
+        this.element.addEventListener('webkitTransitionEnd', resetDuration);
     };
     Scroll.prototype.refresh = function () {
         var parent = this.element.parentNode;
